@@ -14,6 +14,4 @@ brew install dapr/tap/dapr-cli
 
 ## Generate new version.
 
-1. Generate bottle and upload to [BinTray](https://bintray.com/dapr/bottles-dapr/dapr-cli).
-
-2. Update `dapr-cli.rb` and push.
+Automated via GitHub action, runs every 5 minutes.

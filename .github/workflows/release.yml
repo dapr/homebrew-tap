@@ -1,0 +1,128 @@
+# ------------------------------------------------------------
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+# ------------------------------------------------------------
+
+name: release
+
+on:
+  schedule:
+    - cron:  '*/5 * * * *'
+jobs:
+  build:
+    name: Build ${{ matrix.target_os }}_${{ matrix.target_arch }} binaries
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macOS-latest]
+        target_arch: [amd64]
+        include:
+          - os: macOS-latest
+            target_os: darwin
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Check Homebrew installation
+        run: brew help
+      - name: Create artifact directory
+        run: mkdir -p release && touch release/version.txt
+      - name: Fetch latest released version for Dapr Cli.
+        env:
+          GITHUB_TOKEN: ${{ secrets.DAPR_BOT_TOKEN }}
+        run: |
+          DAPR_CLI_VERSION=$( curl -s -f "https://x-access-token:${GITHUB_TOKEN}@api.github.com/repos/dapr/cli/releases" | grep \"tag_name\" | grep -v rc | awk 'NR==1{print $2}' |  sed -n 's/\"v\(.*\)\",/\1/p' )
+          echo "Found version ${DAPR_CLI_VERSION}"
+          echo "##[set-env name=DAPR_CLI_VERSION;]$DAPR_CLI_VERSION"
+      - name: Check if Dapr Cli's version is new.
+        run: |
+          NEW_VERSION=$( cat dapr-cli.rb | grep "version " | grep "'${DAPR_CLI_VERSION}'" &> /dev/null || echo "yes" )
+          echo "##[set-env name=NEW_VERSION;]$NEW_VERSION"
+      - name: Get Dapr Cli's source code tarball's shasum.
+        env:
+          GITHUB_TOKEN: ${{ secrets.DAPR_BOT_TOKEN }}
+        if: env.NEW_VERSION == 'yes'
+        run: |
+          DAPR_CLI_SRC_SHASUM=$( curl -L -f "https://x-access-token:${GITHUB_TOKEN}@github.com/dapr/cli/archive/v${DAPR_CLI_VERSION}.tar.gz" 2> /dev/null | shasum -a 256 | sed -n 's/\(.*\) -/\1/p' | xargs -I {} echo {} )
+          echo "##[set-env name=DAPR_CLI_SRC_SHASUM;]$DAPR_CLI_SRC_SHASUM"
+      - name: Get Homebrew's tap for Dapr Cli.
+        if: env.NEW_VERSION == 'yes'
+        run: brew tap dapr/tap && brew update
+      - name: Generating initial formula for new version.
+        if: env.NEW_VERSION == 'yes'
+        run: bash ./.github/scripts/generate-temp-formula.sh
+      - name: Generating Homebrew's bottle file for Dapr Cli.
+        if: env.NEW_VERSION == 'yes'
+        run: |
+          brew install dapr-cli --build-bottle && brew bottle dapr-cli
+          generated_bottle_filename=$( ls -1 *.bottle.*.tar.gz )
+          bottle_filename=$( echo $generated_bottle_filename | sed -e 's/--/-/' | sed -e 's/bottle.*.tar.gz/bottle.tar.gz/' )
+          DAPR_CLI_BOTTLE_OS_VERSION=$( echo $generated_bottle_filename | sed -e 's/--/-/' | sed -e 's/bottle.*.tar.gz/bottle.tar.gz/' | sed -e 's/.*\.\(.*\)\.bottle.*/\1/' )
+          mv $generated_bottle_filename $bottle_filename
+          DAPR_CLI_BOTTLE_SHASUM=$( shasum -a 256 ${bottle_filename} | sed -n "s/\(.*\) ${bottle_filename}/\1/p" | xargs -I {} echo {} )
+          mkdir -p release
+          mv $bottle_filename release/$bottle_filename
+          echo ${DAPR_CLI_VERSION} > release/version.txt
+          echo "##[set-env name=DAPR_CLI_BOTTLE_OS_VERSION;]$DAPR_CLI_BOTTLE_OS_VERSION"
+          echo "##[set-env name=DAPR_CLI_BOTTLE_SHASUM;]$DAPR_CLI_BOTTLE_SHASUM"
+      - name: Generating initial formula for new version.
+        if: env.NEW_VERSION == 'yes'
+        run: bash ./.github/scripts/generate-formula.sh
+      - name: Release artifacts
+        uses: actions/upload-artifact@master
+        with:
+          name: bottle_drop
+          path: ./release
+      - name: Commit to repository
+        if: env.NEW_VERSION == 'yes'
+        env:
+          GITHUB_TOKEN: ${{ secrets.DAPR_BOT_TOKEN }}
+          COMMIT_MSG: |
+            Updating dapr-cli formula for version ${{ env.DAPR_CLI_VERSION }}
+            skip-checks: true
+        run: |
+          git config user.email "Dapr Bot"
+          git config user.name "daprweb@microsoft.com"
+          # Update origin with token
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
+          # Checkout the branch so we can push back to it
+          git checkout master
+          git add .
+          # Only commit and push if we have changes
+          git diff --quiet && git diff --staged --quiet || (git commit -m "${COMMIT_MSG}"; git push origin master)
+  publish:
+    name: Publish binaries
+    needs: build
+    env:
+      ARTIFACT_DIR: ./release
+    runs-on: ubuntu-latest
+    steps:
+      - name: download artifacts
+        uses: actions/download-artifact@master
+        with:
+          name: bottle_drop
+          path: ${{ env.ARTIFACT_DIR }}
+      - name: Set Release Version
+        run: |
+          REL_VERSION_FILE="${{ env.ARTIFACT_DIR }}/version.txt"
+          REL_VER=`cat ${REL_VERSION_FILE}`
+          echo "##[set-env name=REL_VERSION;]${REL_VER}"
+          rm -f ${REL_VERSION_FILE}
+      - name: publish binaries to github
+        if: env.REL_VERSION != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.DAPR_BOT_TOKEN }}
+        run: |
+          echo "installing github-release-cli..."
+          sudo npm install --slient --no-progress -g github-release-cli
+          # Get the list of files
+          RELEASE_ARTIFACT=(${ARTIFACT_DIR}/*)
+          # Parse repository to get owner and repo names
+          OWNER_NAME="${GITHUB_REPOSITORY%%/*}"
+          REPO_NAME="${GITHUB_REPOSITORY#*/}"
+          echo "Uploading Dapr CLI Binaries to GitHub Release"
+          github-release upload \
+            --owner $OWNER_NAME --repo $REPO_NAME \
+            --tag "v${REL_VERSION}" \
+            --name "Dapr CLI v${REL_VERSION}" \
+            --prerelease false \
+            ${RELEASE_ARTIFACT[*]}

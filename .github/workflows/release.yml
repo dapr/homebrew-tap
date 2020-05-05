@@ -54,8 +54,8 @@ jobs:
         if: env.NEW_VERSION == 'yes'
         run: |
           brew install dapr-cli --build-bottle && brew bottle dapr-cli
-          generated_bottle_filename=$( ls -1 *.bottle.tar.gz )
-          bottle_filename=$( echo $generated_bottle_filename | sed -e 's/--/-/' )
+          generated_bottle_filename=$( ls -1 *.bottle.??tar.gz )
+          bottle_filename=$( echo $generated_bottle_filename | sed -e 's/--/-/' | sed -e 's/\.1\.tar.gz/.tar.gz/' )
           DAPR_CLI_BOTTLE_OS_VERSION=$( echo $generated_bottle_filename | sed -e 's/--/-/' | sed -e 's/.*\.\(.*\)\.bottle.*/\1/' )
           mv $generated_bottle_filename $bottle_filename
           DAPR_CLI_BOTTLE_SHASUM=$( shasum -a 256 ${bottle_filename} | sed -n "s/\(.*\) ${bottle_filename}/\1/p" | xargs -I {} echo {} )
@@ -89,6 +89,8 @@ jobs:
           git add .
           # Only commit and push if we have changes
           git diff --quiet && git diff --staged --quiet || (git commit -m "${COMMIT_MSG}"; git push origin master)
+          git tag v${{env.DAPR_CLI_VERSION}}
+          git push origin --tags
   publish:
     name: Publish binaries
     needs: build

@@ -54,9 +54,9 @@ jobs:
         if: env.NEW_VERSION == 'yes'
         run: |
           brew install dapr-cli --build-bottle && brew bottle dapr-cli
-          generated_bottle_filename=$( ls -1 *.bottle.*.tar.gz )
-          bottle_filename=$( echo $generated_bottle_filename | sed -e 's/--/-/' | sed -e 's/bottle.*.tar.gz/bottle.tar.gz/' )
-          DAPR_CLI_BOTTLE_OS_VERSION=$( echo $generated_bottle_filename | sed -e 's/--/-/' | sed -e 's/bottle.*.tar.gz/bottle.tar.gz/' | sed -e 's/.*\.\(.*\)\.bottle.*/\1/' )
+          generated_bottle_filename=$( ls -1 *.bottle.tar.gz )
+          bottle_filename=$( echo $generated_bottle_filename | sed -e 's/--/-/' )
+          DAPR_CLI_BOTTLE_OS_VERSION=$( echo $generated_bottle_filename | sed -e 's/--/-/' | sed -e 's/.*\.\(.*\)\.bottle.*/\1/' )
           mv $generated_bottle_filename $bottle_filename
           DAPR_CLI_BOTTLE_SHASUM=$( shasum -a 256 ${bottle_filename} | sed -n "s/\(.*\) ${bottle_filename}/\1/p" | xargs -I {} echo {} )
           mkdir -p release

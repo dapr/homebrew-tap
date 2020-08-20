@@ -6,16 +6,16 @@
 class DaprCli < Formula
   desc "Client for Dapr."
   homepage "https://dapr.io"
-  version '0.9.0'
-  url "https://github.com/dapr/cli/archive/v0.9.0.tar.gz"
-  sha256 "91955867387f2004374027d9302a75746d67334f59cbc5f17c87ee52d71f27fe"
+  version '0.10.0'
+  url "https://github.com/dapr/cli/archive/v0.10.0.tar.gz"
+  sha256 "79595592bb88d102efaab1c5c57a13df5ad29aa9dcec13e1a94f3212683ee9cb"
 
   depends_on "go" => :build
 
   bottle do
-    root_url "https://github.com/dapr/homebrew-tap/releases/download/v0.9.0"
+    root_url "https://github.com/dapr/homebrew-tap/releases/download/v0.10.0"
     cellar :any_skip_relocation
-    sha256 "1040f244c191f71b843226708a532d980deacc2777a32d6951139046a11f78fa" => :catalina
+    sha256 "1a9ac628d27bea8c58b3a3e96cf84e5df587047113a02f5df343fc24da4efd9e" => :catalina
   end
 
   def install

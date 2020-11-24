@@ -12,7 +12,7 @@ echo "# ------------------------------------------------------------
 # Licensed under the MIT License.
 # ------------------------------------------------------------
 
-class DaprCli < Formula
+class ${FORMULA_CLASSNAME} < Formula
   desc \"Client for Dapr.\"
   homepage \"https://dapr.io\"
   version '${DAPR_CLI_VERSION}'
@@ -36,4 +36,4 @@ class DaprCli < Formula
     system \"#{bin}/dapr\", \"--version\"
   end
 end
-" > dapr-cli.rb
+" > ${FORMULA_FILENAME}

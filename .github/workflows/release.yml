@@ -69,7 +69,9 @@ jobs:
         if: env.NEW_VERSION == 'yes'
         run: |
           brew unlink go@1.15 || echo "Could not unlink Go@1.15"
-          brew install go
+          # Go might fail just to symlink.
+          brew install go || echo "Installing Go might have failed"
+          brew link --overwrite go
       - name: Generating Homebrew's bottle file for Dapr Cli.
         if: env.NEW_VERSION == 'yes'
         run: |

@@ -65,10 +65,14 @@ jobs:
       - name: Generating initial formula for new version.
         if: env.NEW_VERSION == 'yes'
         run: bash ./.github/scripts/generate-temp-formula.sh
+      - name: Setup Go
+        if: env.NEW_VERSION == 'yes'
+        run: |
+          brew unlink go@1.15 || echo "Could not unlink Go@1.15"
+          brew install go
       - name: Generating Homebrew's bottle file for Dapr Cli.
         if: env.NEW_VERSION == 'yes'
         run: |
-          brew unlink go && brew install go
           brew install ${{ env.FORMULA_NAME }} --build-bottle && brew bottle ${{ env.FORMULA_NAME }}
           generated_bottle_filename=$( ls -1 *.bottle.*tar.gz )
           bottle_filename=$( echo $generated_bottle_filename | sed -e 's/--/-/' | sed -e 's/\.1\.tar.gz/.tar.gz/' )

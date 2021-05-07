@@ -24,7 +24,7 @@ class ${FORMULA_CLASSNAME} < Formula
   bottle do
     root_url \"https://github.com/dapr/homebrew-tap/releases/download/v${DAPR_CLI_VERSION}\"
     cellar :any_skip_relocation
-    sha256 \"${DAPR_CLI_BOTTLE_SHASUM}\" => :${DAPR_CLI_BOTTLE_OS_VERSION}
+    sha256 ${DAPR_CLI_BOTTLE_OS_VERSION}: \"${DAPR_CLI_BOTTLE_SHASUM}\"
   end
 
   def install

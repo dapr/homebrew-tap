@@ -14,7 +14,7 @@ class DaprCliAT120Rc2 < Formula
 
   bottle do
     root_url "https://github.com/dapr/homebrew-tap/releases/download/v1.2.0-rc.2"
-    sha256 cellar :any_skip_relocation, catalina: "308a5159037153f52c9d96773da00411456d2d94554e3a123f68c3ba4e1406d2"
+    sha256 cellar: :any_skip_relocation, catalina: "308a5159037153f52c9d96773da00411456d2d94554e3a123f68c3ba4e1406d2"
   end
 
   def install

@@ -22,36 +22,37 @@ jobs:
           - os: macOS-latest
             target_os: darwin
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
       - name: Setup and build
         if: github.event_name == 'pull_request'
-          - name: Fetch latest released version for Dapr Cli.
-            run: |
+          run: |
               DAPR_CLI_VERSION=$( curl -s -f "https://x-access-token:${GITHUB_TOKEN}@api.github.com/repos/dapr/cli/releases" | grep \"tag_name\" | awk 'NR==1{print $2}' |  sed -n 's/\"v\(.*\)\",/\1/p' )
               echo "Found version ${DAPR_CLI_VERSION}"
               echo "DAPR_CLI_VERSION=$DAPR_CLI_VERSION" >> $GITHUB_ENV
-          - name: Generate filename.
-            run: |
+      - name: Generate filename.
+          run: |
               FORMULA_FILENAME=$( bash ./.github/scripts/generate-filename.sh )
               echo "FORMULA_FILENAME=$FORMULA_FILENAME" >> $GITHUB_ENV
-          - name: Generate formula name
-            run: |
+      - name: Generate formula name
+          run: |
               FORMULA_NAME=$( bash ./.github/scripts/generate-formula-name.sh )
               echo "FORMULA_NAME=$FORMULA_NAME" >> $GITHUB_ENV
-          - name: Generate classname
-            run: |
+      - name: Generate classname
+          run: |
               FORMULA_CLASSNAME=$( bash ./.github/scripts/generate-formula-classname.sh )
               echo "FORMULA_CLASSNAME=$FORMULA_CLASSNAME" >> $GITHUB_ENV
-          - name: Check if Dapr Cli's version is new.
-            run: |
+      - name: Check if Dapr Cli's version is new.
+          run: |
               NEW_VERSION=$( cat ${FORMULA_FILENAME} | grep "version " | grep "'${DAPR_CLI_VERSION}'" &> /dev/null || echo "yes" )
               echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
-          - name: Get Dapr Cli's source code tarball's shasum.
-            env:
-              GITHUB_TOKEN: ${{ secrets.DAPR_BOT_TOKEN }}
-            if: env.NEW_VERSION == 'yes'
+      - name: Get Dapr Cli's source code tarball's shasum.
+          env:
+            GITHUB_TOKEN: ${{ secrets.DAPR_BOT_TOKEN }}
+          if: env.NEW_VERSION == 'yes'
             run: |
               DAPR_CLI_SRC_SHASUM=$( curl -L -f "https://x-access-token:${GITHUB_TOKEN}@github.com/dapr/cli/archive/v${DAPR_CLI_VERSION}.tar.gz" 2> /dev/null | shasum -a 256 | cut -d\- -f1 | xargs -I {} echo {} )
               echo "DAPR_CLI_SRC_SHASUM=$DAPR_CLI_SRC_SHASUM" >> $GITHUB_ENV
-          - name: Get Homebrew's tap for Dapr Cli.
-            if: env.NEW_VERSION == 'yes'
+      - name: Get Homebrew's tap for Dapr Cli.
+          if: env.NEW_VERSION == 'yes'
               brew tap dapr/tap && brew update

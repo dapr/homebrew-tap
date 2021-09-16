@@ -20,10 +20,11 @@ class ${FORMULA_CLASSNAME} < Formula
   sha256 \"${DAPR_CLI_SRC_SHASUM}\"
 
   depends_on \"go\" => :build
+  depends_on \"make\" => :build
 
   def install
-    system \"go\", \"build\", \"-ldflags\", \"-X main.version=#{version} -X main.apiVersion=1.0\", \"-o\", \"./cli\"
-    bin.install \"cli\" => \"dapr\"
+    system \"make\", \"REL_VERSION=#{version}\"
+    bin.install \"dist/darwin_amd64/release/dapr\" => \"dapr\"
   end
 
   test do

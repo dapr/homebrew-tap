@@ -20,7 +20,7 @@ class DaprCliAT150Rc1 < Formula
 
   def install
     system "make", "REL_VERSION=#{version}"
-    bin.install "dist/darwin_amd64/release/dapr" => "dapr"
+    bin.install Dir["dist/*/release/dapr"].first  => "dapr"
   end
 
   test do

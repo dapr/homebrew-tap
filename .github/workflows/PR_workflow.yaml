@@ -3,7 +3,7 @@
 # Licensed under the MIT License.
 # ------------------------------------------------------------
 
-name: PR_workflow
+name: PR Workflow
 
 on:
   pull_request:

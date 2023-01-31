@@ -21,11 +21,6 @@ class DaprCli < Formula
   depends_on "go" => :build
   depends_on "make" => :build
 
-  bottle do
-    root_url "https://github.com/dapr/homebrew-tap/releases/download/v1.9.1"
-    sha256 cellar: :any_skip_relocation, monterey: "390134e715c1245010464c0d26c314dd37f0c0d11bf2d39a6c6a1e4957a6a2d0"
-  end
-
   def install
     system "make", "REL_VERSION=#{version}"
     bin.install Dir["dist/*/release/dapr"].first  => "dapr"

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ------------------------------------------------------------
-# Copyright 2021 The Dapr Authors
+# Copyright 2024 The Dapr Authors
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -15,8 +15,10 @@
 
 set -ue
 
+THIS_YEAR=$(date +%Y)
+
 echo "# ------------------------------------------------------------
-# Copyright 2021 The Dapr Authors
+# Copyright ${THIS_YEAR} The Dapr Authors
 # Licensed under the Apache License, Version 2.0 (the \"License\");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at

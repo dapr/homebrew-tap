@@ -44,7 +44,11 @@ class ${FORMULA_CLASSNAME} < Formula
   end
 
   def install
-    system \"make\", \"REL_VERSION=#{version}\"
+    with_env(
+     \"GOPROXY\" => ENV[\"HOMEBREW_GOPROXY\"] ? ENV[\"HOMEBREW_GOPROXY\"] : ENV[\"GOPROXY\"],
+    ) do
+      system \"make\", \"REL_VERSION=#{version}\"
+    end
     bin.install Dir[\"dist/*/release/dapr\"].first  => \"dapr\"
   end
 

@@ -1,5 +1,5 @@
 # ------------------------------------------------------------
-# Copyright 2021 The Dapr Authors
+# Copyright 2024 The Dapr Authors
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,20 +14,24 @@
 class DaprCli < Formula
   desc "Client for Dapr."
   homepage "https://dapr.io"
-  version '1.12.0'
-  url "https://github.com/dapr/cli/archive/v1.12.0.tar.gz"
-  sha256 "f3ca6b5da4ffd46f578020e307a1abfd4633e82c0aa5151881e7e48fafb706b1"
+  version '1.13.0'
+  url "https://github.com/dapr/cli/archive/v1.13.0.tar.gz"
+  sha256 "6acbf9fbe78bb74ce62141cca1ebff1fa881a5a90b080af983e7d8df142ceabd"
 
   depends_on "go" => :build
   depends_on "make" => :build
 
   bottle do
-    root_url "https://github.com/dapr/homebrew-tap/releases/download/v1.12.0"
-    sha256 cellar: :any_skip_relocation, monterey: "fc57026b4e79c9d4b1386632e4a10952b1b5a694d461bce84000a39e8dc1d609"
+    root_url "https://github.com/dapr/homebrew-tap/releases/download/v1.13.0"
+    sha256 cellar: :any_skip_relocation, monterey: "ce3ab3068fea3b27a2b7b2493641243a70f17161fac4950803354735954eb8a7"
   end
 
   def install
-    system "make", "REL_VERSION=#{version}"
+    with_env(
+     "GOPROXY" => ENV["HOMEBREW_GOPROXY"] ? ENV["HOMEBREW_GOPROXY"] : ENV["GOPROXY"],
+    ) do
+      system "make", "REL_VERSION=#{version}"
+    end
     bin.install Dir["dist/*/release/dapr"].first  => "dapr"
   end
 

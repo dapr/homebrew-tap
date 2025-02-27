@@ -1,5 +1,5 @@
 # ------------------------------------------------------------
-# Copyright 2024 The Dapr Authors
+# Copyright 2025 The Dapr Authors
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,16 +14,16 @@
 class DaprCli < Formula
   desc "Client for Dapr."
   homepage "https://dapr.io"
-  version '1.14.1'
-  url "https://github.com/dapr/cli/archive/v1.14.1.tar.gz"
-  sha256 "93dcd4f4231c878c1e492a69253b813da570c8010f76a5a44875a48316320478"
+  version '1.15.0'
+  url "https://github.com/dapr/cli/archive/v1.15.0.tar.gz"
+  sha256 "6b597fccca18d49590ae7e37844fc9adce52daf748a541747b34bb20da3afcb0"
 
   depends_on "go" => :build
   depends_on "make" => :build
 
   bottle do
-    root_url "https://github.com/dapr/homebrew-tap/releases/download/v1.14.1"
-    sha256 cellar: :any_skip_relocation, arm64_sonoma: "d354ed01ee1b923b7ff8a274b90c241e6addcaf9c522c43273ee8e794a8dd4a5"
+    root_url "https://github.com/dapr/homebrew-tap/releases/download/v1.15.0"
+    sha256 cellar: :any_skip_relocation, arm64_sonoma: "7e9f1632fba54a5796f08bd4875504b136533633976fbb9255eef1c1de60ab41"
   end
 
   def install

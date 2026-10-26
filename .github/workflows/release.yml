@@ -69,7 +69,7 @@ jobs:
           echo "DAPR_CLI_SRC_SHASUM=$DAPR_CLI_SRC_SHASUM" >> $GITHUB_ENV
       - name: Get Homebrew's tap for Dapr Cli.
         if: env.NEW_VERSION == 'yes'
-        run: brew tap dapr/tap && brew update
+        run: brew tap dapr/tap && brew trust dapr/tap && brew update
       - name: Generating initial formula for new version.
         if: env.NEW_VERSION == 'yes'
         run: bash ./.github/scripts/generate-temp-formula.sh
